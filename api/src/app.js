@@ -6,6 +6,8 @@ import { env } from "../config/env.js";
 import { errorHandler } from "../middleware/error.js";
 import authRoutes from "../modules/auth/auth.routes.js";
 
+const a = 5;
+
 const app = express();
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
