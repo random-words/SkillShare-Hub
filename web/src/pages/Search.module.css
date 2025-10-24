@@ -1,0 +1,43 @@
+.main {
+  padding: 16px 16px 90px;
+}
+.filters {
+  margin: 10px 0 6px;
+}
+.section {
+  margin: 18px 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 14px;
+}
+.person {
+  text-align: center;
+}
+.avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  background: linear-gradient(180deg, #fde68a, #a7f3d0);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 32px;
+}
+.name {
+  font-weight: 700;
+}
+.sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}

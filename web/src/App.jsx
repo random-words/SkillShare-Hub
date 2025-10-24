@@ -1,24 +1,16 @@
-import { Link, Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import styles from "./App.module.css";
+import BottomNav from "./components/BottomNav/BottomNav";
 
 export default function App() {
+  const { pathname } = useLocation();
+  const isAuth = pathname.startsWith("/auth");
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <header className="border-b bg-white">
-        <div className="mx-auto max-w-5xl flex items-center gap-4 p-4">
-          <h1 className="font-bold">Skillshare Hub</h1>
-          <nav className="flex gap-3 text-sm">
-            <Link to="/">Home</Link>
-            <Link to="/search">Search</Link>
-            <Link to="/schedule">Schedule</Link>
-            <Link to="/chat">Chat</Link>
-            <Link to="/profile">Profile</Link>
-            <Link to="/auth/login">Login</Link>
-          </nav>
-        </div>
-      </header>
-      <main className="mx-auto max-w-5xl p-6">
+    <div className={styles.app}>
+      <div className={styles.screen}>
         <Outlet />
-      </main>
+        {!isAuth && <BottomNav />}
+      </div>
     </div>
   );
 }

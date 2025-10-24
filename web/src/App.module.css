@@ -1,0 +1,23 @@
+.app {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.screen {
+  background: var(--bg);
+  width: 100%;
+  max-width: var(--maxw);
+  min-height: 100dvh;
+  box-shadow: var(--shadow);
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .screen {
+    min-height: 740px;
+    border-radius: 20px;
+  }
+}
