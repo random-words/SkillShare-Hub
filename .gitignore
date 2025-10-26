@@ -25,4 +25,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment files (local configs)
-/.env.*
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+node_modules

@@ -1,0 +1,32 @@
+.wrap {
+  display: block;
+  width: 100%;
+}
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #f3f4f6;
+  padding: 14px 14px;
+  border-radius: var(--radius);
+  font-size: 16px;
+}
+.input:focus {
+  border-color: #cbd5e1;
+  background: #eef2f7;
+}
+.error {
+  border-color: #f43f5e;
+  background: #fff1f2;
+}
+.errText {
+  display: block;
+  margin-top: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+}

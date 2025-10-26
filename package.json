@@ -1,0 +1,37 @@
+{
+  "name": "skillshare-hub",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18.18"
+  },
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "postinstall": "husky",
+    "dev": "npm-run-all --parallel dev:*",
+    "dev:api": "npm --workspace api run dev",
+    "dev:web": "npm --workspace web run dev",
+    "build": "npm-run-all build:*",
+    "build:api": "npm --workspace api run build",
+    "build:web": "npm --workspace web run build",
+    "preview": "npm --workspace web run preview",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.4.0",
+    "@commitlint/config-conventional": "^19.4.0",
+    "eslint": "^9.38.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "husky": "^9.1.0",
+    "lint-staged": "^15.5.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.6.2"
+  }
+}
