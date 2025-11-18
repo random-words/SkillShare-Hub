@@ -3,18 +3,29 @@ import Header from "../../components/Header";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import styles from "./auth.module.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../app/authContext";
 
 export default function Login() {
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const submit = e => {
     e.preventDefault();
     const next = {};
     if (!values.email.includes("@")) next.email = "Enter a valid email";
     if (values.password.length < 6) next.password = "Min 6 characters";
+
     setErrors(next);
+
+    if (Object.keys(next).length === 0) {
+      login({ email: values.email });
+
+      navigate("/");
+    }
   };
 
   return (
