@@ -1,9 +1,0 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-export const env = {
-  NODE_ENV: process.env.NODE_ENV ?? "development",
-  PORT: Number(process.env.PORT ?? 4000),
-  CORS_ORIGIN: process.env.CORS_ORIGIN ?? "http://localhost:5173",
-  JWT_SECRET: process.env.JWT_SECRET ?? "dev-secret",
-};
