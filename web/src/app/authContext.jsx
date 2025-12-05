@@ -1,71 +1,88 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const AuthContext = createContext(null);
-const USER_KEY = "skillshare_user";
 
-const MOCK_USERS = {
-  "exists@user.com": { id: 1, email: "exists@user.com", password: "good_password" },
-};
+const USER_KEY = "skillshare_user";
+const TOKEN_KEY = "skillshare_token";
+const API_URL = "http://localhost:4000/api";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
   useEffect(() => {
-    setLoadingAuth(true);
-    setTimeout(() => {
-      const storedUser = localStorage.getItem(USER_KEY);
-      if (storedUser) {
+    const storedUser = localStorage.getItem(USER_KEY);
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+
+    if (storedUser && storedToken) {
+      try {
         setUser(JSON.parse(storedUser));
+        setToken(storedToken);
+      } catch {
+        localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(TOKEN_KEY);
       }
-      setLoadingAuth(false);
-    }, 500);
+    }
+    setLoadingAuth(false);
   }, []);
 
-  const register = useCallback(credentials => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const { email, password } = credentials;
-        if (email === "exists@user.com") {
-          reject(new Error("User with this email already exists"));
-          return;
-        }
-
-        const newUser = { id: Date.now(), email };
-        localStorage.setItem(USER_KEY, JSON.stringify(newUser));
-        setUser(newUser);
-        resolve(newUser);
-      }, 1000);
+  const register = useCallback(async ({ email, password }) => {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to register");
+    }
+
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    localStorage.setItem(TOKEN_KEY, data.token);
+
+    setUser(data.user);
+    setToken(data.token);
+
+    return data.user;
   }, []);
 
-  const login = useCallback(credentials => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const { email, password } = credentials;
-
-        if (password === "wrong") {
-          reject(new Error("Invalid email or password"));
-          return;
-        }
-
-        const fakeUser = { id: 1, email };
-        localStorage.setItem(USER_KEY, JSON.stringify(fakeUser));
-        setUser(fakeUser);
-        resolve(fakeUser);
-      }, 1000);
+  const login = useCallback(async ({ email, password }) => {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to login");
+    }
+
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    localStorage.setItem(TOKEN_KEY, data.token);
+
+    setUser(data.user);
+    setToken(data.token);
+
+    return data.user;
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     setUser(null);
+    setToken(null);
   }, []);
 
   const value = {
     user,
+    token,
     loadingAuth,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !!token,
     login,
     register,
     logout,

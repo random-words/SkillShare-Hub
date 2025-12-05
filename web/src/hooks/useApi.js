@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const MOCK_DATA = [
+const MOCK_USERS = [
   { id: 1, name: "Ethan Carter", subtitle: "Photography, Editing", rating: "4.8", lessons: 12 },
   {
     id: 2,
@@ -13,8 +13,10 @@ const MOCK_DATA = [
   { id: 4, name: "Olivia Hayes", subtitle: "Writing, Content Creation", rating: "4.6", lessons: 8 },
 ];
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
- * @param {string} url - URL (ми його не використовуємо, але лишаємо для інтерфейсу)
+ * @param {string} url
  * @returns {{ data: any, loading: boolean, error: Error | null }}
  */
 export const useApi = url => {
@@ -23,18 +25,50 @@ export const useApi = url => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
-    const timer = setTimeout(() => {
-      setData(MOCK_DATA);
-      setLoading(false);
+    const load = async () => {
+      setLoading(true);
+      setError(null);
 
-      // setError(new Error("Failed to fetch data from " + url));
-      // setLoading(false);
-    }, 1500);
+      try {
+        await sleep(1500);
 
-    return () => clearTimeout(timer);
+        let payload;
+        if (url === "/users") {
+          payload = MOCK_USERS;
+        } else {
+          payload = [];
+        }
+
+        const encoded = encodeURIComponent(JSON.stringify(payload));
+        const res = await fetch(`data:application/json,${encoded}`);
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch ${url}: ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        if (!cancelled) {
+          setData(json);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err : new Error("Unknown error"));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
   return { data, loading, error };
