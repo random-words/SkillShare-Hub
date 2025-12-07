@@ -20,3 +20,30 @@ export async function getMatchesForUser(userId) {
 
   return res.rows;
 }
+
+export async function createMatch(userId, partnerId) {
+  if (userId === partnerId) {
+    throw new Error("Cannot match with yourself");
+  }
+
+  const existing = await query(
+    "SELECT id FROM matches WHERE user_id = $1 AND partner_id = $2",
+    [userId, partnerId]
+  );
+
+  if (existing.rowCount > 0) {
+    return existing.rows[0];
+  }
+
+  const res1 = await query(
+    "INSERT INTO matches (user_id, partner_id) VALUES ($1, $2) RETURNING id",
+    [userId, partnerId]
+  );
+
+  await query("INSERT INTO matches (user_id, partner_id) VALUES ($1, $2)", [
+    partnerId,
+    userId,
+  ]);
+
+  return res1.rows[0];
+}

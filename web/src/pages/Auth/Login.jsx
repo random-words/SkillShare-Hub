@@ -14,7 +14,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const submit = async e => {
+  const submit = async (e) => {
     e.preventDefault();
     setErrors({});
     setLoading(true);
@@ -30,7 +30,7 @@ export default function Login() {
     }
 
     try {
-      await login({ email: values.email, password: values.password });
+      await login(values);
       navigate("/");
     } catch (err) {
       setErrors({ api: err.message });
@@ -50,7 +50,9 @@ export default function Login() {
           <Input
             placeholder="Email"
             value={values.email}
-            onChange={e => setValues(v => ({ ...v, email: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, email: e.target.value }))
+            }
             error={errors.email}
             disabled={loading}
           />
@@ -58,7 +60,9 @@ export default function Login() {
             placeholder="Password"
             type="password"
             value={values.password}
-            onChange={e => setValues(v => ({ ...v, password: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, password: e.target.value }))
+            }
             error={errors.password}
             disabled={loading}
           />

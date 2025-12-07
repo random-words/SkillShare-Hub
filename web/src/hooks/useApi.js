@@ -1,30 +1,24 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../app/authContext";
 
-const MOCK_USERS = [
-  { id: 1, name: "Ethan Carter", subtitle: "Photography, Editing", rating: "4.8", lessons: 12 },
-  {
-    id: 2,
-    name: "Sophia Bennett",
-    subtitle: "Graphic Design, Illustration",
-    rating: "4.9",
-    lessons: 15,
-  },
-  { id: 3, name: "Liam Harper", subtitle: "Coding, Web Development", rating: "4.7", lessons: 10 },
-  { id: 4, name: "Olivia Hayes", subtitle: "Writing, Content Creation", rating: "4.6", lessons: 8 },
-];
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const API_URL = "http://localhost:4000/api";
 
 /**
- * @param {string} url
- * @returns {{ data: any, loading: boolean, error: Error | null }}
+ * @param {string | null} path  - наприклад "/users" або "/schedule/me"
+ * @param {RequestInit & { auth?: boolean }} options
  */
-export const useApi = url => {
+export const useApi = (path, { auth = false, ...options } = {}) => {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(path));
   const [error, setError] = useState(null);
+  const { token } = useAuth();
 
   useEffect(() => {
+    if (!path) {
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     const load = async () => {
@@ -32,23 +26,26 @@ export const useApi = url => {
       setError(null);
 
       try {
-        await sleep(1500);
+        const headers = new Headers(options.headers || {});
+        headers.set("Content-Type", "application/json");
 
-        let payload;
-        if (url === "/users") {
-          payload = MOCK_USERS;
-        } else {
-          payload = [];
+        if (auth && token) {
+          headers.set("Authorization", `Bearer ${token}`);
         }
 
-        const encoded = encodeURIComponent(JSON.stringify(payload));
-        const res = await fetch(`data:application/json,${encoded}`);
+        const res = await fetch(`${API_URL}${path}`, {
+          ...options,
+          headers,
+        });
 
         if (!res.ok) {
-          throw new Error(`Failed to fetch ${url}: ${res.status}`);
+          const body = await res.json().catch(() => null);
+          const msg =
+            body?.message || `Request failed with status ${res.status}`;
+          throw new Error(msg);
         }
 
-        const json = await res.json();
+        const json = await res.json().catch(() => null);
 
         if (!cancelled) {
           setData(json);
@@ -65,11 +62,10 @@ export const useApi = url => {
     };
 
     load();
-
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [path, auth, token]);
 
   return { data, loading, error };
 };

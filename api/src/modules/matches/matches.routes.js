@@ -4,6 +4,7 @@ import { authRequired } from "../../middleware/auth.js";
 
 const r = Router();
 
-r.get("/", authRequired, controller.list); // GET /api/matches
+r.get("/", authRequired, controller.list);
+r.post("/", authRequired, controller.create);
 
 export default r;

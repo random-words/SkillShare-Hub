@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 const USER_KEY = "skillshare_user";
 const TOKEN_KEY = "skillshare_token";
@@ -35,7 +41,6 @@ export function AuthProvider({ children }) {
     });
 
     const data = await res.json().catch(() => null);
-
     if (!res.ok) {
       throw new Error(data?.message || "Failed to register");
     }
@@ -45,7 +50,6 @@ export function AuthProvider({ children }) {
 
     setUser(data.user);
     setToken(data.token);
-
     return data.user;
   }, []);
 
@@ -57,7 +61,6 @@ export function AuthProvider({ children }) {
     });
 
     const data = await res.json().catch(() => null);
-
     if (!res.ok) {
       throw new Error(data?.message || "Failed to login");
     }
@@ -67,7 +70,6 @@ export function AuthProvider({ children }) {
 
     setUser(data.user);
     setToken(data.token);
-
     return data.user;
   }, []);
 
@@ -92,9 +94,9 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context;
+  return ctx;
 };

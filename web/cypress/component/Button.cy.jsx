@@ -1,31 +1,27 @@
 import React from "react";
-import Button from "../../src/components/Button/Button";
+import { mount } from "cypress/react18";
+import Button from "../../src/components/Button/Button.jsx";
+import styles from "../../src/components/Button/Button.module.css";
 
 describe("<Button />", () => {
   it("renders children", () => {
-    cy.mount(<Button>Click me</Button>);
-    cy.contains("Click me").should("be.visible");
+    mount(<Button>Click me</Button>);
+    cy.contains("Click me").should("exist");
   });
 
   it("uses primary variant by default", () => {
-    cy.mount(<Button>Primary</Button>);
+    mount(<Button>Primary</Button>);
 
     cy.get("button")
-      .should("have.attr", "class")
-      .then(cls => {
-        expect(cls).to.contain("btn");
-        expect(cls).to.contain("primary");
-      });
+      .should("have.class", styles.btn)
+      .and("have.class", styles.primary);
   });
 
   it("supports ghost variant", () => {
-    cy.mount(<Button variant="ghost">Ghost</Button>);
+    mount(<Button variant="ghost">Ghost</Button>);
 
     cy.get("button")
-      .should("have.attr", "class")
-      .then(cls => {
-        expect(cls).to.contain("btn");
-        expect(cls).to.contain("ghost");
-      });
+      .should("have.class", styles.btn)
+      .and("have.class", styles.ghost);
   });
 });

@@ -1,15 +1,14 @@
 import React from "react";
-import SkillTag from "../../src/components/SkillTag";
+import { mount } from "cypress/react18";
+import SkillTag from "../../src/components/SkillTag.jsx";
+import styles from "../../src/components/SkillTag.module.css";
 
 describe("<SkillTag />", () => {
   it("renders text with tag class", () => {
-    cy.mount(<SkillTag>React</SkillTag>);
+    mount(<SkillTag>Python</SkillTag>);
 
     cy.get("span")
-      .contains("React")
-      .should("have.attr", "class")
-      .then(cls => {
-        expect(cls).to.contain("tag");
-      });
+      .should("have.class", styles.tag)
+      .and("contain.text", "Python");
   });
 });

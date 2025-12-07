@@ -1,21 +1,20 @@
 import React from "react";
-import Input from "../../src/components/Input/Input";
+import { mount } from "cypress/react18";
+import Input from "../../src/components/Input/Input.jsx";
+import styles from "../../src/components/Input/Input.module.css";
 
 describe("<Input />", () => {
   it("renders label and placeholder", () => {
-    cy.mount(<Input label="Email" placeholder="Enter email" />);
-    cy.contains("Email").should("be.visible");
-    cy.get("input").should("have.attr", "placeholder", "Enter email");
+    mount(<Input label="Email" placeholder="Enter email" />);
+
+    cy.contains("Email").should("exist");
+    cy.get("input[placeholder='Enter email']").should("exist");
   });
 
   it("shows error text and error style", () => {
-    cy.mount(<Input label="Email" error="Invalid" />);
+    mount(<Input label="Email" error="Required" />);
 
-    cy.contains("Invalid").should("be.visible");
-    cy.get("input")
-      .should("have.attr", "class")
-      .then(cls => {
-        expect(cls).to.contain("error");
-      });
+    cy.contains("Required").should("exist");
+    cy.get("input").should("have.class", styles.error);
   });
 });

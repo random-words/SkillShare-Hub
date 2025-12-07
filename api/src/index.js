@@ -10,10 +10,17 @@ const io = new SocketIOServer(server, {
   cors: {
     origin: env.CORS_ORIGIN,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
+app.set("io", io);
+
 io.on("connection", (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+
+  socket.on("error", (err) => console.error("Socket error:", err));
+
   registerChatHandlers(io, socket);
 });
 
