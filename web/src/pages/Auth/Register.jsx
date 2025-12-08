@@ -37,7 +37,7 @@ export default function Register() {
 
     try {
       await register({ email: values.email, password: values.password });
-      navigate("/");
+      navigate("/onboarding");
     } catch (err) {
       setErrors({ api: err.message });
     } finally {

@@ -9,6 +9,7 @@ import Chat from "../pages/Chat.jsx";
 import Login from "../pages/Auth/Login.jsx";
 import Register from "../pages/Auth/Register.jsx";
 import NotFound from "../pages/NotFound.jsx";
+import Onboarding from "../pages/Onboarding.jsx";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       { path: "schedule", element: <Schedule /> },
       { path: "chat", element: <Chat /> },
       { path: "chat/:matchId", element: <Chat /> },
+      { path: "onboarding", element: <Onboarding /> },
     ],
   },
   {

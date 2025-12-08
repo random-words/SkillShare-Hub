@@ -54,10 +54,8 @@ export default function Chat() {
     socket.emit("chat:join", { matchId: Number(matchId) });
 
     socket.on("chat:message", (msg) => {
-      if (msg.match_id === Number(matchId)) {
-        if (msg.sender_id !== user?.id) {
-          setMessages((prev) => [...prev, msg]);
-        }
+      if (msg.sender_id !== user?.id) {
+        setMessages((prev) => [...prev, msg]);
       }
     });
 
