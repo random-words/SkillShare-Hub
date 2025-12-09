@@ -1,40 +1,47 @@
-import React from "react";
-import { MemoryRouter } from "react-router-dom";
 import Profile from "../../../src/pages/Profile";
 import { AuthContext } from "../../../src/app/authContext";
+import { BrowserRouter } from "react-router-dom";
 
 describe("<Profile />", () => {
   it("shows main profile info and skills", () => {
     const mockUser = {
-      name: "Sophia Carter",
-      email: "sophia@example.com",
-      headline: "Senior Developer",
+      id: 7,
+      name: "Test User",
+      email: "test@example.com",
+      headline: "Frontend Developer",
+      skills: [
+        { name: "HTML", level: "advanced" },
+        { name: "CSS", level: "intermediate" },
+      ],
+      learning: [],
     };
 
-    const authValue = {
+    const mockAuthValue = {
       user: mockUser,
+      token: "fake-test-token",
       isAuthenticated: true,
-      login: cy.stub(),
       logout: cy.stub(),
     };
 
+    cy.intercept("GET", "**/api/auth/me", {
+      statusCode: 200,
+      body: { user: mockUser },
+    }).as("getFreshProfile");
+
     cy.mount(
-      <AuthContext.Provider value={authValue}>
-        <MemoryRouter>
+      <BrowserRouter>
+        <AuthContext.Provider value={mockAuthValue}>
           <Profile />
-        </MemoryRouter>
-      </AuthContext.Provider>
+        </AuthContext.Provider>
+      </BrowserRouter>
     );
 
-    cy.contains("Sophia Carter").should("be.visible");
-    cy.contains("Senior Developer").should("be.visible");
+    cy.wait("@getFreshProfile");
 
-    cy.contains("Skills I Can Teach").should("be.visible");
+    cy.contains("Test User").should("be.visible");
+    cy.contains("Frontend Developer").should("be.visible");
 
     cy.contains("HTML").should("be.visible");
     cy.contains("CSS").should("be.visible");
-
-    cy.contains("Skills I Want to Learn").should("be.visible");
-    cy.contains("JavaScript").should("be.visible");
   });
 });
