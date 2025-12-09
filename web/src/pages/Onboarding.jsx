@@ -56,11 +56,11 @@ export default function Onboarding() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ skills: mySkills }),
+        body: JSON.stringify({ skills: mySkills, type: "teach" }),
       });
 
       if (response.ok) {
-        navigate("/");
+        window.location.href = "/profile";
       } else {
         alert("Error saving skills");
       }

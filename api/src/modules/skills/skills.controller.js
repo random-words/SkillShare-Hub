@@ -13,19 +13,24 @@ export async function getAllSkills(req, res, next) {
 export async function addUserSkills(req, res, next) {
   try {
     const userId = req.user.id;
-    const { skills } = req.body;
+    const { skills, type } = req.body;
 
-    if (!skills || !Array.isArray(skills) || skills.length === 0) {
-      throw httpError(400, "Please select at least one skill");
+    const isTeaching = type === "teach";
+
+    if (!skills || !Array.isArray(skills)) {
+      throw httpError(400, "Invalid skills format");
     }
+
+    await query(
+      "DELETE FROM user_skills WHERE user_id = $1 AND can_teach = $2",
+      [userId, isTeaching]
+    );
 
     for (const item of skills) {
       await query(
         `INSERT INTO user_skills (user_id, skill_id, level, can_teach)
-         VALUES ($1, $2, $3, true)
-         ON CONFLICT (user_id, skill_id, can_teach) DO UPDATE 
-         SET level = EXCLUDED.level`,
-        [userId, item.skillId, item.level]
+         VALUES ($1, $2, $3, $4)`,
+        [userId, item.skillId, item.level, isTeaching]
       );
     }
 

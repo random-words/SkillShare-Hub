@@ -8,7 +8,8 @@ import { useState } from "react";
 import { useAuth } from "../app/authContext";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:4000/api";
+// const API_URL = "http://localhost:4000/api";
+const API_URL = "/api";
 
 export default function Search() {
   const [query, setQuery] = useState("");
@@ -71,9 +72,18 @@ export default function Search() {
 
             <div className={styles.info}>
               <div className={styles.name}>{p.name}</div>
-              <div className={styles.sub}>{p.subtitle || "No info"}</div>
+              <div className={styles.sub}>{p.subtitle || "No headline"}</div>
+
+              {p.skills_str && (
+                <div
+                  style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}
+                >
+                  Teaches: <strong>{p.skills_str}</strong>
+                </div>
+              )}
+
               <div className={styles.meta}>
-                {p.rating} • {p.lessons} lessons
+                {Number(p.rating).toFixed(1)} ★ • {p.lessons} lessons
               </div>
             </div>
 

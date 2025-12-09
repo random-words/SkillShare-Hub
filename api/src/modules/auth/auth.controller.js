@@ -21,6 +21,16 @@ export async function login(req, res, next) {
   }
 }
 
+export async function logout(req, res, next) {
+  try {
+    res.clearCookie("token");
+
+    return ok(res, { message: "Logged out successfully" });
+  } catch (e) {
+    next(e);
+  }
+}
+
 export async function me(req, res, next) {
   try {
     const result = await service.getMe(req.user.id);

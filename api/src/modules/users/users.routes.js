@@ -3,7 +3,7 @@ import * as controller from "./users.controller.js";
 
 const r = Router();
 
-r.get("/", controller.list); // GET /api/users
-r.get("/:id", controller.getOne); // GET /api/users/:id
+// GET /api/users?q=React
+r.get("/", controller.getUsers);
 
 export default r;

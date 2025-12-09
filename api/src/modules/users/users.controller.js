@@ -1,23 +1,42 @@
-import * as service from "./users.service.js";
+import { query } from "../../db/index.js";
 import { ok } from "../../utils/http.js";
 
-export async function list(req, res, next) {
+export async function getUsers(req, res, next) {
   try {
-    const search = req.query.q ?? "";
-    const users = await service.listUsers(search);
-    return ok(res, users);
-  } catch (e) {
-    next(e);
-  }
-}
+    const { q } = req.query;
 
-export async function getOne(req, res, next) {
-  try {
-    const user = await service.getUserById(Number(req.params.id));
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    return ok(res, user);
+    const searchTerm = q ? `%${q}%` : "%";
+
+    const text = `
+      SELECT 
+        u.id, 
+        u.display_name as name, 
+        u.headline as subtitle, 
+        u.rating, 
+        u.lessons_count as lessons,
+        (
+           SELECT string_agg(s.name, ', ')
+           FROM user_skills us
+           JOIN skills s ON s.id = us.skill_id
+           WHERE us.user_id = u.id AND us.can_teach = true
+        ) as skills_str
+      FROM users u
+      WHERE 
+        u.display_name ILIKE $1 
+        OR 
+        EXISTS (
+           SELECT 1 FROM user_skills us
+           JOIN skills s ON s.id = us.skill_id
+           WHERE us.user_id = u.id 
+           AND us.can_teach = true
+           AND s.name ILIKE $1
+        )
+      LIMIT 50
+    `;
+
+    const result = await query(text, [searchTerm]);
+
+    return ok(res, result.rows);
   } catch (e) {
     next(e);
   }

@@ -78,18 +78,27 @@ export async function login({ email, password }) {
 }
 
 export async function getMe(userId) {
-  const res = await query(
+  const userRes = await query(
     `SELECT id, email, display_name, headline, rating, lessons_count
-     FROM users
-     WHERE id = $1`,
+     FROM users WHERE id = $1`,
     [userId]
   );
 
-  if (res.rowCount === 0) {
-    throw httpError(404, "User not found");
-  }
+  if (userRes.rowCount === 0) throw httpError(404, "User not found");
+  const u = userRes.rows[0];
 
-  const u = res.rows[0];
+  const skillsRes = await query(
+    `SELECT s.id, s.name, us.level, us.can_teach
+     FROM user_skills us
+     JOIN skills s ON s.id = us.skill_id
+     WHERE us.user_id = $1`,
+    [userId]
+  );
+
+  const allSkills = skillsRes.rows;
+  const teachSkills = allSkills.filter((s) => s.can_teach === true);
+  const learnSkills = allSkills.filter((s) => s.can_teach === false);
+
   return {
     user: {
       id: u.id,
@@ -98,6 +107,8 @@ export async function getMe(userId) {
       subtitle: u.headline,
       rating: Number(u.rating),
       lessons: u.lessons_count,
+      skills: teachSkills,
+      learning: learnSkills,
     },
   };
 }
