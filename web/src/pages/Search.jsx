@@ -1,21 +1,117 @@
 import Header from "../components/Header";
 import Input from "../components/Input/Input";
 import SkillTag from "../components/SkillTag";
+import Button from "../components/Button/Button";
 import styles from "./Search.module.css";
+import { useApi } from "../hooks/useApi";
+import { useState } from "react";
+import { useAuth } from "../app/authContext";
+import { useNavigate } from "react-router-dom";
 
-const MOCK = [
-  { name: "Ethan Carter", subtitle: "Photography, Editing", rating: "4.8", lessons: 12 },
-  { name: "Sophia Bennett", subtitle: "Graphic Design, Illustration", rating: "4.9", lessons: 15 },
-  { name: "Liam Harper", subtitle: "Coding, Web Development", rating: "4.7", lessons: 10 },
-  { name: "Olivia Hayes", subtitle: "Writing, Content Creation", rating: "4.6", lessons: 8 },
-];
+// const API_URL = "http://localhost:4000/api";
+const API_URL = "/api";
 
 export default function Search() {
+  const [query, setQuery] = useState("");
+
+  const { data, loading, error } = useApi(
+    query ? `/users?q=${encodeURIComponent(query)}` : "/users"
+  );
+
+  const { token, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const [inviting, setInviting] = useState(null);
+
+  const results = data ?? [];
+
+  const handleInvite = async (partnerId) => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    setInviting(partnerId);
+
+    try {
+      const res = await fetch(`${API_URL}/matches`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ partnerId }),
+      });
+
+      if (res.ok) {
+        navigate("/chat");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        alert(body.message || "Failed to invite user");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error connecting to server");
+    } finally {
+      setInviting(null);
+    }
+  };
+
+  const renderContent = () => {
+    if (loading) return <p className={styles.status}>Loading results...</p>;
+    if (error)
+      return <p className={styles.error}>Failed to load: {error.message}</p>;
+    if (!results || results.length === 0)
+      return <p className={styles.status}>No results found.</p>;
+
+    return (
+      <div className={styles.grid}>
+        {results.map((p) => (
+          <div key={p.id} className={styles.person}>
+            <div className={styles.avatar}>{p.name[0]}</div>
+
+            <div className={styles.info}>
+              <div className={styles.name}>{p.name}</div>
+              <div className={styles.sub}>{p.subtitle || "No headline"}</div>
+
+              {p.skills_str && (
+                <div
+                  style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}
+                >
+                  Teaches: <strong>{p.skills_str}</strong>
+                </div>
+              )}
+
+              <div className={styles.meta}>
+                {Number(p.rating).toFixed(1)} ★ • {p.lessons} lessons
+              </div>
+            </div>
+
+            <div className={styles.action}>
+              <Button
+                variant="primary"
+                className={styles.inviteBtn}
+                disabled={inviting === p.id}
+                onClick={() => handleInvite(p.id)}
+              >
+                {inviting === p.id ? "..." : "Invite"}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <>
       <Header title="Find a Partner" back />
       <main className={styles.main}>
-        <Input placeholder="Search" />
+        <Input
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
         <div className={styles.filters}>
           <SkillTag>Skills</SkillTag>
           <SkillTag>Interests</SkillTag>
@@ -24,18 +120,7 @@ export default function Search() {
 
         <h3 className={styles.section}>Results</h3>
 
-        <div className={styles.grid}>
-          {MOCK.map(p => (
-            <div key={p.name} className={styles.person}>
-              <div className={styles.avatar}>{p.name[0]}</div>
-              <div className={styles.name}>{p.name}</div>
-              <div className={styles.sub}>{p.subtitle}</div>
-              <div className={styles.meta}>
-                {p.rating} • {p.lessons} lessons
-              </div>
-            </div>
-          ))}
-        </div>
+        {renderContent()}
       </main>
     </>
   );

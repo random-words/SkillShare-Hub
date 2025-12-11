@@ -1,2 +1,17 @@
-export const ok = (res, data) => res.status(200).json(data);
-export const created = (res, data) => res.status(201).json(data);
+export function ok(res, data) {
+  return res.status(200).json(data);
+}
+
+export function created(res, data) {
+  return res.status(201).json(data);
+}
+
+export function noContent(res) {
+  return res.status(204).end();
+}
+
+export function httpError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}

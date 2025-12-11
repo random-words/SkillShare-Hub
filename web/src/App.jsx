@@ -4,7 +4,8 @@ import BottomNav from "./components/BottomNav/BottomNav";
 
 export default function App() {
   const { pathname } = useLocation();
-  const isAuth = pathname.startsWith("/auth");
+  const isAuth = pathname.startsWith("/auth") || pathname === "/onboarding";
+
   return (
     <div className={styles.app}>
       <div className={styles.screen}>

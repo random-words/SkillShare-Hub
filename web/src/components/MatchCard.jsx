@@ -1,17 +1,22 @@
+import React from "react";
 import styles from "./MatchCard.module.css";
 
-export default function MatchCard({ name, subtitle, rating, lessons }) {
+export default function MatchCard({ name, subtitle, meta }) {
+  const initial = name?.[0]?.toUpperCase() ?? "?";
+
   return (
-    <div className={styles.card}>
-      <div className={styles.avatar}>{name?.[0] || "U"}</div>
-      <div className={styles.meta}>
-        <div className={styles.name}>{name}</div>
-        <div className={styles.sub}>{subtitle}</div>
-        {(rating || lessons) && (
-          <div className={styles.small}>
-            {rating && <span>{rating} • </span>}
-            {lessons && <span>{lessons} lessons</span>}
-          </div>
+    <div className={styles.card} data-testid="match-card">
+      <div className={styles.avatar} data-testid="match-card-avatar">
+        {initial}
+      </div>
+
+      <div className={styles.info}>
+        <h3 className={styles.name}>{name}</h3>
+        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        {meta && (
+          <p className={styles.meta} data-testid="match-card-meta">
+            {meta}
+          </p>
         )}
       </div>
     </div>

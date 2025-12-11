@@ -14,8 +14,8 @@ export default function Home() {
           Exchange Skills.
         </h1>
         <p className={styles.lead}>
-          SkillShare Hub is a community-driven platform where you can exchange skills and knowledge
-          with others.
+          SkillShare Hub is a community-driven platform where you can exchange
+          skills and knowledge with others.
         </p>
 
         <div className={styles.search}>

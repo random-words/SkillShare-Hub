@@ -5,14 +5,40 @@
   border-radius: var(--radius);
   font-weight: 600;
   cursor: pointer;
+  font-size: 15px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease,
+    opacity 0.1s ease;
 }
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+  box-shadow: none;
+}
+
 .primary {
   background: var(--primary);
   color: white;
-  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.35);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
+
+.primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
 .ghost {
   background: transparent;
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+.ghost:hover:not(:disabled) {
+  background: #f3f4f6;
 }

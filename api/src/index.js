@@ -1,19 +1,29 @@
 import http from "http";
-import { Server } from "socket.io";
-import app from "./utils/app.js";
+import { Server as SocketIOServer } from "socket.io";
+import app from "./app.js";
 import { env } from "./config/env.js";
+import { registerChatHandlers } from "./modules/chat/chat.gateway.js";
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: env.CORS_ORIGIN, credentials: true },
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: env.CORS_ORIGIN,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
-// простий socket namespace
-io.on("connection", socket => {
-  socket.on("ping", () => socket.emit("pong"));
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+
+  socket.on("error", (err) => console.error("Socket error:", err));
+
+  registerChatHandlers(io, socket);
 });
 
-const port = env.PORT || 4000;
-server.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+server.listen(env.PORT, () => {
+  console.log(`API listening on http://localhost:${env.PORT}`);
 });

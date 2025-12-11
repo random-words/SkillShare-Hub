@@ -1,28 +1,114 @@
-// skillshare-hub/api/src/modules/auth/auth.service.js
-import jwt from "jsonwebtoken";
-import { env } from "../../config/env.js";
+import { query } from "../../db/index.js";
+import {
+  hashPassword,
+  comparePassword,
+  createToken,
+} from "../../utils/crypto.js";
+import { httpError } from "../../utils/http.js";
 
-const demoUser = { id: 1, email: "demo@user.com", password: "demo1234" };
-
-export async function register({ email, password }) {
-  // демо: "реєструємо" без БД
-  if (!email || !password) {
-    const err = new Error("Email and password are required");
-    err.status = 400;
-    throw err;
+export async function register({ email, password, name }) {
+  if (!email || !email.includes("@")) {
+    throw httpError(400, "Valid email is required");
   }
-  return { id: 2, email, note: "demo registration (no DB)" };
+  if (!password || password.length < 6) {
+    throw httpError(400, "Password must be at least 6 characters");
+  }
+
+  const existing = await query("SELECT id FROM users WHERE email = $1", [
+    email,
+  ]);
+  if (existing.rowCount > 0) {
+    throw httpError(409, "User with this email already exists");
+  }
+
+  const passwordHash = await hashPassword(password);
+  const displayName = name || email.split("@")[0];
+
+  const result = await query(
+    `INSERT INTO users (email, password_hash, display_name)
+     VALUES ($1, $2, $3)
+     RETURNING id, email, display_name, headline, rating, lessons_count`,
+    [email, passwordHash, displayName]
+  );
+
+  const user = result.rows[0];
+  const token = createToken({ sub: user.id, email: user.email });
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.display_name,
+    },
+  };
 }
 
 export async function login({ email, password }) {
-  const valid = email === demoUser.email && password === demoUser.password;
-  if (!valid) {
-    const err = new Error("Invalid credentials");
-    err.status = 401;
-    throw err;
+  if (!email || !password) {
+    throw httpError(400, "Email and password are required");
   }
-  const token = jwt.sign({ sub: demoUser.id, email: demoUser.email }, env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
-  return { token, user: { id: demoUser.id, email: demoUser.email } };
+
+  const result = await query(
+    `SELECT id, email, password_hash, display_name
+     FROM users WHERE email = $1`,
+    [email]
+  );
+
+  if (result.rowCount === 0) {
+    throw httpError(401, "Invalid email or password");
+  }
+
+  const user = result.rows[0];
+  const matches = await comparePassword(password, user.password_hash);
+  if (!matches) {
+    throw httpError(401, "Invalid email or password");
+  }
+
+  const token = createToken({ sub: user.id, email: user.email });
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.display_name,
+    },
+  };
+}
+
+export async function getMe(userId) {
+  const userRes = await query(
+    `SELECT id, email, display_name, headline, rating, lessons_count
+     FROM users WHERE id = $1`,
+    [userId]
+  );
+
+  if (userRes.rowCount === 0) throw httpError(404, "User not found");
+  const u = userRes.rows[0];
+
+  const skillsRes = await query(
+    `SELECT s.id, s.name, us.level, us.can_teach
+     FROM user_skills us
+     JOIN skills s ON s.id = us.skill_id
+     WHERE us.user_id = $1`,
+    [userId]
+  );
+
+  const allSkills = skillsRes.rows;
+  const teachSkills = allSkills.filter((s) => s.can_teach === true);
+  const learnSkills = allSkills.filter((s) => s.can_teach === false);
+
+  return {
+    user: {
+      id: u.id,
+      email: u.email,
+      name: u.display_name,
+      subtitle: u.headline,
+      rating: Number(u.rating),
+      lessons: u.lessons_count,
+      skills: teachSkills,
+      learning: learnSkills,
+    },
+  };
 }

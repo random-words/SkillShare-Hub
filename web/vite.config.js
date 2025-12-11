@@ -1,3 +1,25 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-export default defineConfig({ plugins: [react()] });
+import istanbul from "vite-plugin-istanbul";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    istanbul({
+      include: ["src/**/*"],
+      exclude: ["node_modules", "dist", "build", "cypress"],
+      cypress: true,
+      forceBuildInstrument: true,
+      requireEnv: false,
+    }),
+  ],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+});
